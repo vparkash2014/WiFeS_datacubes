@@ -1,0 +1,7 @@
+/Users/vaishaliparkash/Dropbox/WiFes_Data/HIPASSJ1321-27
+J1321-27_R.fits
+J1321-27_B.fits
+1905.
+10.
+0.780
+30.
