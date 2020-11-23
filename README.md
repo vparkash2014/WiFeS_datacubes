@@ -86,7 +86,7 @@ I was not able to uplaod the datacubes to GitHub as they are too large. However 
 In this directory, there is a C-shell script called "runscript". This script will run the "Main_script.py." Just make sure all the paths are defined properly.
 To execute, make sure you are in csh, tcsh or zcsh and type the following command into a terminal:
 ```console
-$ ./myscript
+$ ./runscript
 ```
 
 ## Extra code: 
