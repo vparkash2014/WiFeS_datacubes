@@ -1,0 +1,3 @@
+#!/bin/csh
+
+python Main_script.py J1321-27_input.txt
