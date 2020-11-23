@@ -78,7 +78,10 @@ Important Note:
 - Main_script.py calls upon the functions written in WiFeS_function.py. Make sure that this file is in the same directory. To ensure that everything is running properly, I add the WiFeS_function.py to my Python path
 
 Example Code:
-The 'Example' directory contains example galaxy datacubes, input files, and output files.
+The 'Example' directory contains example input files, and some of the output files.
+I was not able to uplaod the datacubes to GitHub as they are too large. However you can access the datacube and the rest of output files from my dropbox:
+https://www.dropbox.com/sh/39fhc3dyh56r0lm/AACZxqE9pa97py_9q4gplPn3a?dl=0
+
 In this directory, there is a C-shell script called "runscript". This script will run the "Main_script.py." Just make sure all the paths are defined properly.
 To execute, make sure you are in csh, tcsh or zcsh and type the following command into a terminal:
-./myscript
+>> ./myscript
