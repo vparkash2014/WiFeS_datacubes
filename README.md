@@ -8,20 +8,20 @@ The main function of this script is to extract stellar kinematic, gas kinematic 
 
 Warning: this code was designed to specifically for analysing WiFeS cubes of local galaxies (z < 0.01). It can be adopted for different types of observations but with some caution. Please contact me if you need assistance.
 
-More information about WiFeS and pPXF can be found their respected webpages:
+More information about [WiFeS](https://rsaa.anu.edu.au/observatories/instruments/wide-field-spectrograph-wifes) and pPXF can be found their respected webpages:
 https://rsaa.anu.edu.au/observatories/instruments/wide-field-spectrograph-wifes
 https://www-astro.physics.ox.ac.uk/~mxc/software/
 
 
 Below is a list of required the packages that you will need:
-- Python 3.8
-- pPXF : This script has been tested on the version of pPXF released on 11 September 2020. Please contact me if newer versions of pPXF breaks this script and I will de-bug it.
-- Numpy 1.18
-- Scipy 1.4
-- Matplotlib 3.1
-- Astropy
-- Seaborn
-- VorBin : https://pypi.org/project/vorbin/
+* Python 3.8
+* pPXF : This script has been tested on the version of pPXF released on 11 September 2020. Please contact me if newer versions of pPXF breaks this script and I will de-bug it.
+* Numpy 1.18
+* Scipy 1.4
+* Matplotlib 3.1
+* Astropy
+* Seaborn
+* VorBin : https://pypi.org/project/vorbin/
 
 
 Summary of the script/ methods:
