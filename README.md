@@ -1,4 +1,5 @@
 
+# Implementing pPXF Oon WiFeS DataCubes
 Hello fellow WiFeS User/ student. Congrats on a successful observing run! Now time to have some fun. If you are trying to extract the spectra from WiFeS IFU and fit a stellar spectrum then you are in the right spot.
 
 Below provide a description of the main fitting script and all the other files and functions included in this "package." If you have any questions, you can contact me at vparkash2014@gmail.com. Remember NO question is a dumb question.
@@ -77,11 +78,14 @@ destdir+'/integral_spec_ppxf_velgas_output.csv' -- csv file that stores the kine
 
 ## Example Code:
 The 'Example' directory contains example input files, and some of the output files.
-I was not able to uplaod the datacubes to GitHub as they are too large. However you can access the datacube and the rest of output files from my dropbox:
-https://www.dropbox.com/sh/39fhc3dyh56r0lm/AACZxqE9pa97py_9q4gplPn3a?dl=0
+I was not able to uplaod the datacubes to GitHub as they are too large. However you can access the datacube and the rest of output files from my [dropbox](https://www.dropbox.com/sh/39fhc3dyh56r0lm/AACZxqE9pa97py_9q4gplPn3a?dl=0)
+
 
 In this directory, there is a C-shell script called "runscript". This script will run the "Main_script.py." Just make sure all the paths are defined properly.
 To execute, make sure you are in csh, tcsh or zcsh and type the following command into a terminal:
 ```console
 $ ./myscript
 ```
+
+## Extra code: 
+I have written various of visualisation scripts that are currently not available at this time. Please check-out my paper ([Parkash et al., 2019](https://ui.adsabs.harvard.edu/abs/2019MNRAS.485.3169P/abstract)) to see those visualistions/ plots. If you like what you see and interested in those scripts, please free to contact me. 
