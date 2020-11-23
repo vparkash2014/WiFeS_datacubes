@@ -22,10 +22,11 @@ import astropy.units as u
 
 from ppxf import ppxf
 from vorbin import voronoi_2d_binning
+from WiFeS_function import *
 
-"""
-Testing input Parameters
-"""
+
+##### Testing input Parameters
+
 try:
     input = sys.argv[1]
     print('The input file is ', input)
@@ -42,23 +43,20 @@ if len(Lines) != 7:
 
 destdir = str(Lines[0].strip())
 fileR, fileB = str(str(Lines[1].strip())), str(str(Lines[2].strip()))
-crop = [2,35,0,26]
 vel = float(Lines[3].strip())
 PA = float(Lines[4].strip())
 ba = float(Lines[5].strip())
 targetSN_R = float(Lines[6].strip())
 
 
-"""
-Calculating redshift
-"""
+##### Calculating redshift
 c = 299792.458 #Km/s
 z = vel/c
 
-"""
-Read datacube
-"""
-crop = [2,35,0,26]
+
+##### Read datacube
+
+crop = [2,35,0,26] # since the edges of the cubes are messy, I like to crop the datacube. You can uncomment this if you want.
 
 try:
     cubeR, hdrR, varR, lambR, lamRangeR = read_fits(destdir + "/" + fileR, limits = crop)
@@ -70,21 +68,17 @@ except:
 print('Working with Galaxy: ', hdrR['OBJECT'])
 
 
-"""
-Finding the centre galaxy (based of Sextractor)
-"""
-
+##### Finding the centre galaxy (based of Sextractor)
 center = centroid(cubeR, PA, ba)
 print("The center of the galaxy is ", center[0][0], center[0][1] )
 
 
-"""
-Voronoi binning the data by using the var information in the data cube as the noise
-"""
 
+##### Voronoi binning the data by using the var information in the data cube as the noise
 x_1d, y_1d = np.array([x for x in range( cubeR.shape[2] ) for y in range( cubeR.shape[1] )]),\
     np.array([y for x in range( cubeR.shape[2] ) for y in range( cubeR.shape[1] )])
 
+# we don't use the full spectrum to determine the median of each spaxel because of emission lines. Below, I have defined the region that is flat and has no spectrum features
 bin_red = np.array([6000.,6200.])*(1+z)
 bin_blue = np.array([5310, 5680])*(1+z)
 
@@ -121,16 +115,15 @@ fig = voronoi_outputs(cubeR, signal_R, noise_R, signal_B, noise_B, xNode_R, xNod
 fig = voronoi_spectra_outputs(cubeR, cubeB, lamRangeR, lambR, binNum_R, lamRangeB, lambB, binNum_R, destdir+'/'+hdrB['OBJECT']+'_voronoi_spectra.pdf')
 
 
-"""
-------------------- Setup the input parameters -----------------------
-"""
+
+##### Setup the input parameters 
 
 spectrum_B = single_spectra(cubeB, results[0][0],results[0][1])
 spectrum_R = single_spectra(cubeR, results[0][0],results[0][1])
 flux_t, lamb_t = glue_BR(spectrum_B, lambB, spectrum_R, lambR)
 
 specNew, logLam, velscale = util.log_rebin([lamb_t[0], lamb_t[-1]], flux_t, oversample=False,flux=False)
-wave_limit = [3800,6950] # this value will change depending on the galaxy
+wave_limit = [3800,6950] 
 FWHM_gal = np.mean(np.exp(logLam)/3000)
 wave = np.exp(logLam)[np.where((np.exp(logLam) >= wave_limit[0]) & (np.exp(logLam) <= wave_limit[1]))]
 velscale = c*np.log(wave[1]/wave[0])
@@ -138,12 +131,11 @@ lam_range_gal = np.array([np.min(wave), np.max(wave)])/(1 + z) #redshift correct
 print('the un-redshift wavelength is:', lam_range_gal)
 print('the redshift wavelength is:', [wave[0], wave[-1]])
 
-nagalaxy, logLam1, navelscale = util.log_rebin(lam_range_gal, flux_t, oversample=False,flux=False) # the rest frame velocity
+nagalaxy, logLam1, navelscale = util.log_rebin(lam_range_gal, flux_t, oversample=False, flux=False) # the rest frame velocity
 
 
-"""
-------------------- Setup templates -----------------------
-"""
+##### Setup templates 
+
 
 try:
     logLam2, stars_templates = retrieveTemplates(velscale, FWHM_gal, range_sel = [3400,7200])#, ID_template='INDO_US')
@@ -169,9 +161,9 @@ logLam1 = np.log(wave/(1 + z)) #redshift corrected wavelengths
 goodpixels = util.determine_goodpixels(logLam1, [np.exp(logLam2[0]), np.exp(logLam2[-1])], z )  #Generates a list of goodpixels to mask a given set of gas emissionlines.
 
 
-"""
-------------------- Running loop over all the bins -----------------------
-"""
+
+##### ------------------- Running loop over all the bins -----------------------
+
 x_1d, y_1d = np.array([x for x in range( cubeR.shape[2] ) for y in range( cubeR.shape[1] )]),\
                  np.array([y for x in range( cubeR.shape[2] ) for y in range( cubeR.shape[1] )])
 
@@ -195,10 +187,9 @@ for bin in np.unique(binNum_R):
 
     galaxy = specNew[np.where((np.exp(logLam) >= wave_limit[0]) & (np.exp(logLam) <= wave_limit[1]))]
 
-    """
-    pPxf
-    Here the actual fit starts. The best fit is plotted on the screen.
-    """
+
+    ##### pPXF: Here the actual fit starts. The best fit is plotted on the screen.
+
     noise = np.sqrt(np.var(galaxy))
     noise = np.full_like(galaxy,noise)
 
@@ -229,9 +220,9 @@ for bin in np.unique(binNum_R):
 
     plt.savefig(destdir+'/bins/'+'pPXFoutput_'+str(bin)+'.pdf', bbox_inches='tight')
     plt.clf()
-    """
-    Defining all the outputs
-    """
+
+    
+    ##### Defining all the outputs
     solutions.append(pp.sol)
     velF.append(pp.sol[0])
     sigmaF.append(pp.sol[1])
@@ -261,9 +252,8 @@ dat.write(filename, format='csv', overwrite=True)
 
 
 
-"""
-Each spaxels will be assigned a stellar velocity based of ppxf
-"""
+
+##### Each spaxels will be assigned a stellar velocity based of ppxf
 print("Next we are going to create an integrated spectrum and run pPXF on that")
 filename = destdir+'/'+hdrB['OBJECT']+'_voronoi_2d_binning_pp.csv'
 bin_data = Table.read(filename, format = 'csv')
@@ -287,9 +277,9 @@ hdu.writeto(filename,  overwrite = True)
 central_vel = star_vel_cube[int(results[0][1]), int(results[0][0])]
 
 
-"""
-Each voronoi bin will be velocity-shifted to that of the central spaxel and an integrated spectra is created
-"""
+
+##### Each voronoi bin will be velocity-shifted to that of the central spaxel and an integrated spectra is created
+
 fig, ax = plt.subplots(figsize = (17,7))
 integral_spec = np.zeros(len(wave))
 
@@ -306,9 +296,9 @@ for ind, bin in enumerate(fits_v['bin']):
             if np.sum(mask1) >= 1:
                 integral_spec[index] += fits_data['galaxy'][mask1]
 
-"""
-------------------- Running ppxf on the integral spectrum -----------------------
-"""
+
+##### ------------------- Running ppxf on the integral spectrum -----------------------
+
 spec_vor, solutions, velF, sigmaF, V_gas_vector, V_stellar_vector, gas_sigma, stellar_sigma = [], [], [], [], [], [], [], []
 Hdelta, Hgamma, Hbeta, Halpha, SII_6717, SII_6731, OIII_5007d, OI6300d, NII, fluxes =  [], [], [], [], [], [], [], [], [], []
 EW_Ha_vector, SFR_vector, Ha_area1, NII_area_22, SII_area1 = [], [], [], [], []
@@ -316,10 +306,9 @@ EW_Ha_vector, SFR_vector, Ha_area1, NII_area_22, SII_area1 = [], [], [], [], []
 errvelF, errsigmaF, errh3F, errh4F, all_data = [], [], [], [], []
 
 
-"""
-pPxf
-Here the actual fit starts. The best fit is plotted on the screen.
-"""
+
+##### pPxf Here the actual fit starts. The best fit is plotted on the screen.
+
 noise = np.sqrt(np.var(integral_spec))
 noise = np.full_like(integral_spec,noise)
 
@@ -351,10 +340,7 @@ plt.plot(wave, (gas), 'b', linewidth=1)  # overplot emission lines alone
 plt.savefig(destdir+'/pPXFoutput_integral_spec.pdf', bbox_inches='tight')
 plt.clf()
 
-
-"""
-Defining all the outputs
-"""
+##### Defining all the outputs
 solutions.append(pp.sol)
 velF.append(pp.sol[0])
 sigmaF.append(pp.sol[1])
