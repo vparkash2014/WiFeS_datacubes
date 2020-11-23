@@ -17,17 +17,29 @@ from matplotlib.colors import ListedColormap
 def read_fits(filename, limits = [0,0,0,0]):
     """
     Read datacube
-    Input: filname and the y and x boundaries: limits = [ymin,ymax,xmin,xmax]
+
+    Parameters
+    ----------
+    filename: Name of fits file
+    limits = [ymin,ymax,xmin,xmax]: the cropped size of the datacube. Default is [0,0,0,0] (aka no crop is applied)
+
+    Returns
+    -------
+    cube: the datacube [x, y, signal] 
+    hdr: header
+    var: variance in the data
+    lamb: wavelength array
+    lamRange: min and max wavelength
     """
+    
     fits_cube = fits.open(filename)
     cube, hdr, var = fits_cube[0].data, fits_cube[0].header, fits_cube[1].data
     if sum(limits) > 0:
         cube, var = cube[:,limits[0]:limits[1],limits[2]:limits[3]], var[:,limits[0]:limits[1],limits[2]:limits[3]]
     fits_cube.close()
 
-    """
-    Calibrate in wavelength from header keywords
-    """
+    #### Calibrate in wavelength from header keywords
+ 
     cdelt3 = hdr['CDELT3'] # the scale
     crval3 = hdr['CRVAL3'] # the starting wavelength
     naxis3 = hdr['NAXIS3'] # the length of the axis
@@ -39,7 +51,17 @@ def read_fits(filename, limits = [0,0,0,0]):
 
 def centroid(cube, PA, ba):
     """
-    This function finds the centre galaxy (based of Sextractor)
+    find the centriod of the galaxy
+
+    Parameters
+    ----------
+    cube: the data cube
+    PA: the Position angle of the galaxy
+    ba: the axis ratio of the galaxy
+    
+    Returns
+    -------
+    center: the [x,y] position of the center
     """
     frame = np.median(cube, axis=0)
     x_cent,y_cent  = np.where(frame == np.amax(frame))[1], np.where(frame == np.amax(frame))[0]
@@ -58,7 +80,7 @@ def callMeasureVariation(pos, PA, ba, cubeR):
 
 def measureVariation(posMax, cubeR, PA, ba, binSize=0.1, lim=1.2):
     """
-    This function was written by Amelia Fraser-McKelvie and is based off Sextractor
+    This function was written by Amelia Fraser-McKelvie and is based off SExtractor
     """
     listR, listInten = [], []
     for ii in np.arange(len(cubeR)):
@@ -89,7 +111,20 @@ def permutation_indices(data):
 def singal_noise_var_sec(cube, var, lamRange, lamb, wavelength_range):
     """
     This function calculates a mean signal and noise of each spaxel using the var
-    output: 2 1D array listing all the signal and noise for the spaxels
+
+    Parameters
+    ----------
+    cube: the datacube 
+    var: variance in the data
+    lamRange: min and max wavelength of the spectrum
+    lamb: wavelength array
+    wavelength_range: the wavelength range at which the you want to measure the signal and noise from. Note: the spectrum 
+                        should be relative flat and with no spectrum features in this range 
+    
+    Returns
+    -------
+    signal : 1D array of signal for the spaxels
+    noise : 1D array of noise for the spaxels
     """
     signal, noise = [],[]
 
@@ -113,17 +148,36 @@ def singal_noise_var_sec(cube, var, lamRange, lamb, wavelength_range):
 def voronoi_outputs(cube1, signal_1, noise_1, signal_2, noise_2, xNode_1, xNode_2, binNum_1, binNum_2, output, gas = 0):
     """
     Display the results from the voronoi binning.
+
+    Parameters
+    ----------
+    cube1 : the R arm datacube
+    signal_1 : the signal of the red datacube (the output of singal_noise_var_sec)
+    noise_1 : the noise of the red databube (the output of singal_noise_var_sec)
+    signal_2 : the signal of the blue datacube (the output of singal_noise_var_sec)
+    noise_2 : the noise of the blue databube (the output of singal_noise_var_sec)
+    xNode_1 : number of pixels in the given voronoi bin 
+    xNode_2 : number of pixels in the given voronoi bin 
+    binNum_1 : the voronoi bin ID
+    binNum_2: the voronoi bin ID
+    output : directory + filename of where to save the pdf
+    gas :  default is set to = 0. Change this to 1 if you are using this code to visualise the emission flux datacube
+    
+    Returns
+    -------
+    fig : plots of the results
+  
     Update: 14 June 2018: I added a key to deal with the gas data cube that doesn't use two arms, so the first two plots will
-    show the signal map and S/N mar
+    show the signal map and S/N
     """
     x_1d, y_1d = np.array([x for x in range( cube1.shape[2] ) for y in range( cube1.shape[1] )]), np.array([y for x in range( cube1.shape[2] ) for y in range( cube1.shape[1] )])
 
-    "setting up the plot"
+    # setting up the plot
     fig, axs = plt.subplots(4,2, figsize=(4, 10))
     fig.subplots_adjust(hspace=.5)
     plt.setp(axs, xticklabels=[])
     plt.setp(axs, yticklabels=[])
-    "the raw galaxy"
+    # the raw galaxy
     img_1, img_2 = np.full(( cube1.shape[1], cube1.shape[2]), np.nan), np.full((cube1.shape[1], cube1.shape[2]), np.nan)
 
     img_1[y_1d, x_1d] = signal_1
@@ -139,7 +193,7 @@ def voronoi_outputs(cube1, signal_1, noise_1, signal_2, noise_2, xNode_1, xNode_
     img1 = axs[0,1].imshow(img_2, interpolation='nearest', origin='upper', cmap='rainbow', vmin=np.min(img_2), vmax=np.max(img_2) )
     fig.colorbar(img1, ax=axs[0, 1])
 
-    "The voronoi bins"
+    # The voronoi bins
 
     rnd_1, rnd_2 = np.argsort(np.random.random(xNode_1.size)), np.argsort(np.random.random(xNode_2.size))
     counts_1, counts_2 = rnd_1[binNum_1], rnd_2[binNum_2]
@@ -169,7 +223,7 @@ def voronoi_outputs(cube1, signal_1, noise_1, signal_2, noise_2, xNode_1, xNode_
         img5 = axs[2,1].imshow(img_2, interpolation='nearest', origin='upper', cmap='rainbow', vmin=np.min(img_2), vmax=np.max(img_2) )
         fig.colorbar(img5, ax=axs[2, 1])
 
-    "plotting the difference"
+   # plotting the difference
     diff_1, diff_2 = signal_1 - bin_signal_1, signal_1 - bin_signal_1
 
     img_1, img_2 = np.full(( cube1.shape[1], cube1.shape[2]), np.nan),\
@@ -189,6 +243,22 @@ def voronoi_outputs(cube1, signal_1, noise_1, signal_2, noise_2, xNode_1, xNode_
 def voronoi_spectra_outputs(cubeR, cubeB, lamRangeR, lambR, binNum_R, lamRangeB, lambB, binNum_B, output):
     """
     This function is going to compare the individual spaxel spectrum to the voronoi bin spectrum
+
+    Parameters
+    ----------
+    cubeR : the red datacube
+    cubeB : the blue datacube
+    lamRangeR : the wavelength range of the red arm
+    lambR : the wavelength array of the red arm
+    binNum_R: the voronoi bin 
+    lamRangeB: the wavelength range of the blue arm
+    lambB : the wavelength array of the blue arm 
+    binNum_B :  the voronoi bin 
+    output : directory + filename of where to save the pdf
+
+    Returns
+    -------
+    fig : the plots/ spectrum of 10 random spaxels
     """
 
     "First we are going to pick 10 random spaxels in the data cube"
@@ -239,7 +309,22 @@ def voronoi_spectra_outputs(cubeR, cubeB, lamRangeR, lambR, binNum_R, lamRangeB,
 def rebin_spectra(cube, x, y, lamRange, lamb):
     """
     Extracts the a single spectrum for a data given the desired x,y by binning the data using pPXF util.log_rebin
+    
+    Parameters
+    ----------
+    cube : the datacube
+    x : x-coordinate of the spaxel
+    y : y-coordinate of the spaxel
+    lamRange : the wavelength range o
+    lamb : the wavelength array 
+
+    Returns
+    -------
+    specNew : the binned spectrum 
+    logLam : the logged wavelength array
+    velscale: the velocity scale of the spectrum
     """
+
     x = np.atleast_1d(x)
     y = np.atleast_1d(y)
     spectrum = np.median(np.array([cube[:, int(ypair), int(xpair)] for ypair,xpair in zip(y,x)]), axis = 0)
@@ -250,7 +335,18 @@ def rebin_spectra(cube, x, y, lamRange, lamb):
 def single_spectra(cube, x, y):
     """
     Extracts the a single spectrum for a data given the desired x,y without rebinning
+    
+    Parameters
+    ----------
+    cube : the datacube
+    x : x-coordinate of the spaxel
+    y : y-coordinate of the spaxel
+
+    Returns
+    -------
+    spectrum : the spectrum 
     """
+
     x = np.atleast_1d(x)
     y = np.atleast_1d(y)
     spectrum = np.median(np.array([cube[:, int(ypair), int(xpair)] for ypair,xpair in zip(y,x)]), axis = 0)
@@ -259,9 +355,21 @@ def single_spectra(cube, x, y):
 def glue_BR(fluxB, lambB, fluxR, lambR):
     """
     'glues' together the Blue and red arm by scaling the red arm according to the blue velscaleR
-    """
+    
+    Parameters
+    ----------
+    fluxB : flux array of the blue arm
+    lambB : wavelength array of the blue arm
+    fluxR : flux array of the red arm
+    lambR : wavelength array of the red arm
 
-    """First we are figuring out the difference between the two arm. aka how much does the red arm need to be shifted to align with the blue arm"""
+    Returns
+    -------
+    new_flux : flux array
+    new_wave : wavelength array
+    """  
+
+    # First we are figuring out the difference between the two arm. aka how much does the red arm need to be shifted to align with the blue arm
     lim = [lambR[1],lambB[-1]]
     waveB, galB, waveR, galR = \
         lambB[np.where(lambB > lim[0])], fluxB[np.where(lambB > lim[0])],\
@@ -274,7 +382,7 @@ def glue_BR(fluxB, lambB, fluxR, lambR):
     diff = np.mean(diff)
     fluxR[:] = [x - diff for x in fluxR]
 
-    """Increasing the resolution of the red arm to the same resolution of the blue arm to create on spectra"""
+    # Increasing the resolution of the red arm to the same resolution of the blue arm to create on spectra
     lambscale = np.mean(np.diff(lambB))
     new_wave = np.arange(lambB[0], lambR[-1], lambscale)
     new_flux = fluxB
