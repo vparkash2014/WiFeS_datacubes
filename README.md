@@ -84,4 +84,6 @@ https://www.dropbox.com/sh/39fhc3dyh56r0lm/AACZxqE9pa97py_9q4gplPn3a?dl=0
 
 In this directory, there is a C-shell script called "runscript". This script will run the "Main_script.py." Just make sure all the paths are defined properly.
 To execute, make sure you are in csh, tcsh or zcsh and type the following command into a terminal:
->> ./myscript
+```console
+$ ./myscript
+```
