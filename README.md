@@ -25,7 +25,7 @@ Below is a list of required the packages that you will need:
 ## Summary of the script/ methods:
 1. The script implements the Voronoi binning method (Cappellari & Copin,2003, MNRAS, 342, 345) "optimally solves the problem of preserving the maximum spatial resolution of general two-dimensional data (or higher dimensions), given a constraint on the minimum signal-to-noise ratio."  You will need to set the target signal-to-noise ratio ("targetSN"). To figure out the ideal "targetSN" for your data, I suggest that you measure the signal to noise ratio of your observation and determine the perfect balance between resolution and S/N that you need for your science. I have written a separate jupyter notebook that only runs the Voronoi bin method to test a range of S/N (Please contact me if you are interested in that script). Note that the script uses the red arm (data cube) to determine the bins because of my science goals. If you don't want to run the Voronoi bin method, set "targetSN" to a very small number so each spaxel is in its bin.
 
-2. The main part of this script it to implments pPXF on the voronio bin spectra to extract kinematics and gas emission lines. Using the function "retrieveTemplates", the script will look for [INDO-US_Valdes stellar spectra](https://www.noao.edu/cflib/). I have included the templates. You will need to change the path (line 206 in WiFeS_function.py) to these templates in the "retrieveTemplates" function for this to work.
+2. The main part of this script it to implments pPXF on the Voronio bin spectra to extract kinematics and gas emission lines. Using the function "retrieveTemplates", the script will look for [INDO-US_Valdes stellar spectra](https://www.noao.edu/cflib/). I have included the templates. You will need to change the path (line 206 in WiFeS_function.py) to these templates in the "retrieveTemplates" function for this to work.
 
 3. Once we have the kinematics for each bin (and hence pixel), the script will velocity-shift all the spaxels to the centre of the galaxy and combine all the spaxels to create a single integrated galaxy spectrum. Then, it will re-run pPXF on the integrated spectrum. Note, I roughly implement the same method when I extract a nuclear spectrum for in a 3" diameter aperture. That script is currently not included in this script, but if you are interested, please contact me.
 
@@ -41,22 +41,22 @@ The only input variable is a text file that lists/ defines the variables to run 
 Input file:
 ```console
 destdir (the directory where the datacubes are)
-fileR (the R arm data cube)
-fileB (the B arm data cube)
-vel (velocity of the galaxy in km/s. I usually use the values reported from NED)
+fileR (The R arm datacube)
+fileB (The B arm datacube)
+vel (Velocity of the galaxy in km/s. I usually use the values reported from NED)
 PA
 ba
-targetSN (the target signal-noise ratio for voronoi bin)
+targetSN (The target signal-to-noise ratio for Voronoi bin)
 ```
 
 ## Output:
 The output of this script includes various of plots that you can look at to see if the script is working the way you want it to and fits files containing information of the kinematic and emission lines:
 
-destdir+'/'+hdrB['OBJECT']+'_voronoi_2d_binning_pp.csv' -- csv that save the results of the voronoi bin method. Column: x pixel, y pixel, signal, noise, binNum
+destdir+'/'+hdrB['OBJECT']+'_voronoi_2d_binning_pp.csv' -- csv that save the results of the Voronoi bin method. Column: x pixel, y pixel, signal, noise, binNum
 
-destdir+'/'+hdrB['OBJECT']+'.pdf' -- Shows results from the voronoi binning. The left and right panels shows the results for the red and blue arm respectively. The 1st row is the 2D image of the datacubes, the 2nd row shows the location and size of each bin, the 3rd row shows the 2D image of the datacubes after the spaxels are combined with respect to the voronio bins and 4th row is the difference between the 1st and 3rd row. The main purpose of these plots is to see how the spatial resolution is affected by the Voronoi bin method.
+destdir+'/'+hdrB['OBJECT']+'.pdf' -- Shows results from the Voronoi binning. The left and right panels shows the results for the red and blue arm respectively. The 1st row is the 2D image of the datacubes, the 2nd row shows the location and size of each bin, the 3rd row shows the 2D image of the datacubes after the spaxels are combined with respect to the Voronio bins and 4th row is the difference between the 1st and 3rd row. The main purpose of these plots is to see how the spatial resolution is affected by the Voronoi bin method.
 
-destdir+'/'+hdrB['OBJECT']+'_voronoi_spectra.pdf' -- This pdf/plots compares 10 random individual spaxel spectrum to the voronoi bin spectrum. This is a visual test to see if we are obtaining the S/N that we want and to see if the voronoi bin spectrum are combined correctly.
+destdir+'/'+hdrB['OBJECT']+'_voronoi_spectra.pdf' -- This pdf/plots compares 10 random individual spaxel spectrum to the Voronoi bin spectrum. This is a visual test to see if we are obtaining the S/N that we want and to see if the Voronoi bin spectrum are combined correctly.
 
 destdir+'/bins/'+'pPXFoutput_'+str(bin)+'.csv' -- The output csv file of pPXF for each bin. Columns: wavelength, observed spectrum, bestfit spectrum, stellar component, & gas component.
 
