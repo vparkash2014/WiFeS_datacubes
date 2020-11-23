@@ -1,5 +1,5 @@
 
-# Implementing pPXF Oon WiFeS DataCubes
+# Implementing pPXF on WiFeS DataCubes
 Hello fellow WiFeS User/ student. Congrats on a successful observing run! Now time to have some fun. If you are trying to extract the spectra from WiFeS IFU and fit a stellar spectrum then you are in the right spot.
 
 Below provide a description of the main fitting script and all the other files and functions included in this "package." If you have any questions, you can contact me at vparkash2014@gmail.com. Remember NO question is a dumb question.
