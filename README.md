@@ -37,7 +37,9 @@ $ python Main_script.py input_file
 
 ## Input:
 The only input variable is a text file that lists/ defines the variables to run this script. Below is the list of variables that you should define in this text file. Each line should have one variable (no need to include the name of the variable-- i.e. "galaxy = ". The variables should be ordered in the following way. Please look at example input file for clarification.
+
 Input file:
+```console
 destdir (the directory where the datacubes are)
 fileR (the R arm data cube)
 fileB (the B arm data cube)
@@ -45,7 +47,7 @@ vel (velocity of the galaxy in km/s. I usually use the values reported from NED)
 PA
 ba
 targetSN (the target signal-noise ratio for voronoi bin)
-
+```
 
 ## Output:
 The output of this script includes various of plots that you can look at to see if the script is working the way you want it to and fits files containing information of the kinematic and emission lines:
